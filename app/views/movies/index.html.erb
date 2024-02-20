@@ -1,14 +1,78 @@
 <p style="color: green"><%= notice %></p>
 
+# <h1>Movies</h1>
+
+# <div id="movies">
+#   <% @movies.each do |movie| %>
+#     <%= render movie %>
+#     <p>
+#       <%= link_to "Show this movie", movie %>
+#     </p>
+#   <% end %>
+# </div>
+
+# <%= link_to "New movie", new_movie_path %>
+# Testtig
 <h1>Movies</h1>
 
-<div id="movies">
-  <% @movies.each do |movie| %>
-    <%= render movie %>
-    <p>
-      <%= link_to "Show this movie", movie %>
-    </p>
-  <% end %>
-</div>
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Rating</th>
+      <th>Release Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @movies.each do |movie| %>
+      <tr>
+        <td><%= movie.title %></td>
+        <td><%= movie.rating %></td>
+        <td><%= movie.release_date %></td>
+        <td><%= link_to "Show this movie", movie %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
 <%= link_to "New movie", new_movie_path %>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const table = document.getElementById("movies-table");
+    const tbody = table.querySelector("tbody");
+    const headers = table.querySelectorAll("th[data-column]");
+    let sortOrder = {};
+
+    headers.forEach(header => {
+      header.addEventListener("click", () => {
+        const column = header.getAttribute("data-column");
+        const ascending = sortOrder[column] === "asc";
+        sortOrder = {};
+
+        const sortedRows = Array.from(tbody.querySelectorAll("tr"))
+          .slice(1)
+          .sort((a, b) => {
+            const aValue = a.querySelector(`td:nth-child(${header.cellIndex + 1})`).textContent;
+            const bValue = b.querySelector(`td:nth-child(${header.cellIndex + 1})`).textContent;
+            return ascending ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+          });
+
+        if (!ascending) {
+          header.classList.remove("descending");
+          header.classList.add("ascending");
+          sortOrder[column] = "asc";
+        } else {
+          header.classList.remove("ascending");
+          header.classList.add("descending");
+          sortOrder[column] = "desc";
+        }
+
+        tbody.innerHTML = "";
+        sortedRows.forEach(row => tbody.appendChild(row));
+      });
+    });
+  });
+</script>
+
