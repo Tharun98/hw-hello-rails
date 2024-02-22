@@ -1,26 +1,11 @@
-<p style="color: green"><%= notice %></p>
-
-# <h1>Movies</h1>
-
-# <div id="movies">
-#   <% @movies.each do |movie| %>
-#     <%= render movie %>
-#     <p>
-#       <%= link_to "Show this movie", movie %>
-#     </p>
-#   <% end %>
-# </div>
-
-# <%= link_to "New movie", new_movie_path %>
-# Testtig
 <h1>Movies</h1>
 
-<table>
+<table id="movies-table" class="movies-table">
   <thead>
     <tr>
-      <th>Title</th>
-      <th>Rating</th>
-      <th>Release Date</th>
+      <th><a href="#" class="sort-link" data-column="title">Title</a></th>
+      <th><a href="#" class="sort-link" data-column="rating">Rating</a></th>
+      <th><a href="#" class="sort-link" data-column="release_date">Release Date</a></th>
       <th>Action</th>
     </tr>
   </thead>
@@ -30,49 +15,78 @@
         <td><%= movie.title %></td>
         <td><%= movie.rating %></td>
         <td><%= movie.release_date %></td>
-        <td><%= link_to "Show this movie", movie %></td>
+        <td><%= link_to "Show this movie", movie, class: "show-movie-link" %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%= link_to "New movie", new_movie_path %>
+<%= link_to "New movie", new_movie_path, class: "new-movie-link" %>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const table = document.getElementById("movies-table");
+document.addEventListener("DOMContentLoaded", function() {
+  const table = document.getElementById("movies-table");
+
+  // Function to sort the table
+  function sortTable(table, column, order) {
     const tbody = table.querySelector("tbody");
-    const headers = table.querySelectorAll("th[data-column]");
-    let sortOrder = {};
+    const rows = Array.from(tbody.querySelectorAll("tr"));
 
-    headers.forEach(header => {
-      header.addEventListener("click", () => {
-        const column = header.getAttribute("data-column");
-        const ascending = sortOrder[column] === "asc";
-        sortOrder = {};
-
-        const sortedRows = Array.from(tbody.querySelectorAll("tr"))
-          .slice(1)
-          .sort((a, b) => {
-            const aValue = a.querySelector(`td:nth-child(${header.cellIndex + 1})`).textContent;
-            const bValue = b.querySelector(`td:nth-child(${header.cellIndex + 1})`).textContent;
-            return ascending ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
-          });
-
-        if (!ascending) {
-          header.classList.remove("descending");
-          header.classList.add("ascending");
-          sortOrder[column] = "asc";
-        } else {
-          header.classList.remove("ascending");
-          header.classList.add("descending");
-          sortOrder[column] = "desc";
-        }
-
-        tbody.innerHTML = "";
-        sortedRows.forEach(row => tbody.appendChild(row));
-      });
+    const sortedRows = rows.sort((a, b) => {
+      const aValue = a.querySelector(`td:nth-child(${getIndex(table, column) + 1})`).textContent;
+      const bValue = b.querySelector(`td:nth-child(${getIndex(table, column) + 1})`).textContent;
+      
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return order === "asc" ? aValue - bValue : bValue - aValue;
+      } else {
+        return order === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
     });
-  });
-</script>
 
+    tbody.innerHTML = '';
+    sortedRows.forEach(row => tbody.appendChild(row));
+  }
+
+  // Function to get the index of the column
+  function getIndex(table, column) {
+    const headers = table.querySelectorAll("th");
+    for (let i = 0; i < headers.length; i++) {
+      if (headers[i].querySelector(".sort-link").getAttribute("data-column") === column) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // Event listener for column headers
+  table.addEventListener("click", function(event) {
+    const target = event.target;
+    if (target.classList.contains("sort-link")) {
+      const column = target.getAttribute("data-column");
+      const currentOrder = target.classList.contains("asc") ? "desc" : "asc";
+
+      // Remove sorting classes from all other headers
+      table.querySelectorAll(".sort-link").forEach(header => {
+        if (header !== target) {
+          header.classList.remove("asc", "desc");
+        }
+      });
+
+      // Add sorting class to the clicked header
+      target.classList.add(currentOrder);
+
+      // Call a function to sort the table
+      sortTable(table, column, currentOrder);
+    }
+  });
+
+  // Apply sorting if sorting preferences exist in session storage
+  const storedColumn = sessionStorage.getItem('sortColumn');
+  const storedOrder = sessionStorage.getItem('sortOrder');
+  if (storedColumn && storedOrder) {
+    const header = table.querySelector(`.sort-link[data-column="${storedColumn}"]`);
+    header.classList.add(storedOrder);
+    sortTable(table, storedColumn, storedOrder);
+  }
+});
+</script>

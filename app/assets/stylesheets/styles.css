@@ -1,0 +1,33 @@
+/* Add background color */
+body {
+    background-color: #f0f0f0;
+  }
+  
+  /* Style table */
+  .movies-table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+  }
+  
+  .movies-table th, .movies-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .movies-table th {
+    background-color: #f2f2f2;
+  }
+  
+  /* Style links */
+  .show-movie-link, .new-movie-link {
+    color: blue;
+    text-decoration: none;
+  }
+  
+  .show-movie-link:hover, .new-movie-link:hover {
+    text-decoration: underline;
+  }
+  
